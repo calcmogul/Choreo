@@ -18,7 +18,8 @@
 
 using namespace choreolib;
 
-ChoreoTrajectory Choreo::GetTrajectory(std::string_view trajName) {
+std::optional<ChoreoTrajectory> Choreo::GetTrajectory(
+    std::string_view trajName) {
   std::string trajFileName = fmt::format(
       "{}/choreo/{}.traj", frc::filesystem::GetDeployDirectory(), trajName);
 
@@ -49,16 +50,19 @@ std::vector<ChoreoTrajectory> Choreo::GetTrajectoryGroup(
       ++segmentCount;
     }
   }
+
   std::vector<ChoreoTrajectory> group;
   group.reserve(segmentCount);
   for (int i = 1; i <= segmentCount; ++i) {
-    try {
-      group.push_back(Choreo::GetTrajectory(fmt::format("{}.{}", trajName, i)));
-    } catch (const std::exception&) {
+    auto trajectory = Choreo::GetTrajectory(fmt::format("{}.{}", trajName, i));
+    if (trajectory.has_value()) {
+      group.emplace_back(trajectory.value());
+    } else {
       throw std::runtime_error(
           fmt::format("Cannot open file: {}.{}.traj", trajName, i));
     }
   }
+
   return group;
 }
 

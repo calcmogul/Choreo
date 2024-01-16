@@ -20,7 +20,10 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-/** Utilities to load and follow ChoreoTrajectories */
+/**
+ * A class that handles loading choreo trajectories and creating command factories for following
+ * trajectories.
+ */
 public class Choreo {
   private static final Gson gson = new Gson();
 
@@ -28,12 +31,13 @@ public class Choreo {
   public Choreo() {}
 
   /**
-   * Load a trajectory from the deploy directory. Choreolib expects .traj files to be placed in
-   * src/main/deploy/choreo/[trajName].traj .
+   * Loads a trajectory from the deploy directory.
    *
-   * @param trajName the path name in Choreo, which matches the file name in the deploy directory.
-   *     Do not include ".traj" here.
-   * @return the loaded trajectory, or null if the trajectory could not be loaded.
+   * <p>ChoreoLib expects .traj files to be placed in src/main/deploy/choreo/[trajName].traj.
+   *
+   * @param trajName The path name in Choreo, which matches the filename in the deploy directory
+   *     without the .traj extension.
+   * @return The loaded trajectory, or std::nullopt is the file didn't exist.
    */
   public static ChoreoTrajectory getTrajectory(String trajName) {
     var traj_dir = new File(Filesystem.getDeployDirectory(), "choreo");
@@ -43,16 +47,17 @@ public class Choreo {
   }
 
   /**
-   * Loads the split parts of the specified trajectory. Fails and returns null if any of the parts
-   * could not be loaded.
+   * Loads the split parts of a trajectory from the deploy directory.
+   *
+   * <p>ChoreoLib expects split .traj files to be placed in
+   * src/main/deploy/choreo/[trajName].[segmentNumber].traj.
    *
    * <p>This method determines the number of parts to load by counting the files that match the
    * pattern "trajName.X.traj", where X is a string of digits. Let this count be N. It then attempts
-   * to load "trajName.1.traj" through "trajName.N.traj", consecutively counting up. If any of these
-   * files cannot be loaded, the method returns null.
+   * to load "trajName.1.traj" through "trajName.N.traj", consecutively counting up.
    *
-   * @param trajName The path name in Choreo for this trajectory.
-   * @return The ArrayList of segments, in order, or null.
+   * @param trajName The path name in Choreo.
+   * @return The ordered array of segments, or std::nullopt if any files couldn't be loaded.
    */
   public static ArrayList<ChoreoTrajectory> getTrajectoryGroup(String trajName) {
     // Count files matching the pattern for split parts.
@@ -60,6 +65,7 @@ public class Choreo {
     File[] files =
         traj_dir.listFiles((file) -> file.getName().matches(trajName + "\\.\\d+\\.traj"));
     int segmentCount = files.length;
+
     // Try to load the segments.
     var trajs = new ArrayList<ChoreoTrajectory>();
     for (int i = 1; i <= segmentCount; ++i) {
