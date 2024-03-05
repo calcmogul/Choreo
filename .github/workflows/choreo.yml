@@ -16,23 +16,33 @@ jobs:
         include:
           - artifact-name: Windows-x86_64
             os: windows-2022
+            env:
             tauri-build-flags: --target x86_64-pc-windows-msvc -v -- --workspace --timings
 
           - artifact-name: Windows-aarch64
             os: windows-2022
+            env:
             tauri-build-flags: --target aarch64-pc-windows-msvc -v -- --workspace --timings
 
           - artifact-name: macOS-x86_64
             os: macOS-14
+            env:
             tauri-build-flags: --target x86_64-apple-darwin -v -- --workspace --timings
 
           - artifact-name: macOS-aarch64
             os: macOS-14
+            env:
             tauri-build-flags: --target aarch64-apple-darwin -v -- --workspace --timings
 
           - artifact-name: Linux-x86_64
             os: ubuntu-22.04
+            env:
             tauri-build-flags: --target x86_64-unknown-linux-gnu -v -- --workspace --timings
+
+          - artifact-name: Linux-aarch64
+            os: ubuntu-22.04
+            env: PKG_CONFIG_SYSROOT_DIR=/usr/aarch64-linux-gnu
+            tauri-build-flags: --target aarch64-unknown-linux-gnu -v -- --workspace --timings
 
     name: "${{ matrix.artifact-name }}"
     runs-on: ${{ matrix.os }}
@@ -44,8 +54,8 @@ jobs:
         with:
           version: 9
 
-      - name: Install Linux dependencies
-        if: startsWith(matrix.os, 'ubuntu')
+      - name: Install dependencies (Linux x86_64)
+        if: matrix.artifact-name == 'Linux-x86_64'
         run: |
           sudo apt-get update -q
           sudo apt-get install -y \
@@ -57,6 +67,24 @@ jobs:
             librsvg2-dev \
             libssl-dev \
             libwebkit2gtk-4.0-dev \
+            wget
+
+      - name: Install dependencies (Linux aarch64)
+        if: matrix.artifact-name == 'Linux-aarch64'
+        run: |
+          sudo dpkg --add-architecture arm64
+          sudo sed -i '/http:\/\/security.ubuntu.com\/ubuntu\//d' /etc/apt/apt-mirrors.txt
+          echo 'http://ports.ubuntu.com/ubuntu-ports/	priority:3' | sudo tee -a /etc/apt/apt-mirrors.txt
+          sudo apt-get update -q
+          sudo apt-get install -y \
+            build-essential \
+            curl \
+            file \
+            libayatana-appindicator3-dev:arm64 \
+            libgtk-3-dev:arm64 \
+            librsvg2-dev:arm64 \
+            libssl-dev:arm64 \
+            libwebkit2gtk-4.0-dev:arm64 \
             wget
 
       - name: Install Node.js dependencies
@@ -74,12 +102,19 @@ jobs:
       - run: sudo xcode-select -switch /Applications/Xcode_15.3.app
         if: startsWith(matrix.os, 'macOS')
 
+      - name: Set up Linux aarch64 Rust compiler
+        if: matrix.artifact-name == 'Linux-aarch64'
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y g++-aarch64-linux-gnu
+          rustup target install aarch64-unknown-linux-gnu
+
       - name: Set up sccache
         uses: mozilla-actions/sccache-action@v0.0.5
       - name: Cargo test
         run: cargo test
       - name: Build package
-        run: pnpm run tauri build ${{ matrix.tauri-build-flags }}
+        run: ${{ matrix.env }} pnpm run tauri build ${{ matrix.tauri-build-flags }}
         env:
           RUSTC_WRAPPER: sccache
           SCCACHE_GHA_ENABLED: true
@@ -119,6 +154,12 @@ jobs:
         run: |
           zip -j ${{ matrix.artifact-name }}-standalone.zip target/x86_64-unknown-linux-gnu/release/choreo target/x86_64-unknown-linux-gnu/release/choreo-cli
           zip -j ${{ matrix.artifact-name }}.zip ${{ matrix.artifact-name }}-standalone.zip target/x86_64-unknown-linux-gnu/release/bundle/appimage/*.AppImage target/x86_64-unknown-linux-gnu/release/bundle/deb/*.deb target/x86_64-unknown-linux-gnu/release/bundle/rpm/*.rpm
+
+      - name: Package artifacts (Linux aarch64)
+        if: matrix.artifact-name == 'Linux-aarch64'
+        run: |
+          zip -j ${{ matrix.artifact-name }}-standalone.zip target/aarch64-unknown-linux-gnu/release/choreo target/aarch64-unknown-linux-gnu/release/choreo-cli
+          zip -j ${{ matrix.artifact-name }}.zip ${{ matrix.artifact-name }}-standalone.zip target/aarch64-unknown-linux-gnu/release/bundle/appimage/*.AppImage target/aarch64-unknown-linux-gnu/release/bundle/deb/*.deb target/aarch64-unknown-linux-gnu/release/bundle/rpm/*.rpm
 
       - uses: actions/upload-artifact@v4
         with:
@@ -191,6 +232,16 @@ jobs:
           mv choreo_*_amd64.AppImage Choreo-${{ github.ref_name }}-Linux-x86_64.AppImage
           mv choreo_*_amd64.deb Choreo-${{ github.ref_name }}-Linux-x86_64.deb
           mv choreo-*.x86_64.rpm Choreo-${{ github.ref_name }}-Linux-x86_64.rpm
+
+      - name: Rename Linux aarch64 artifacts
+        working-directory: pkg/Linux-aarch64
+        run: |
+          unzip -o Linux-aarch64.zip
+          rm Linux-aarch64.zip
+          mv Linux-aarch64-standalone.zip Choreo-${{ github.ref_name }}-Linux-aarch64-standalone.zip
+          mv choreo_*_amd64.AppImage Choreo-${{ github.ref_name }}-Linux-aarch64.AppImage
+          mv choreo_*_amd64.deb Choreo-${{ github.ref_name }}-Linux-aarch64.deb
+          mv choreo-*.x86_64.rpm Choreo-${{ github.ref_name }}-Linux-aarch64.rpm
 
       - name: Display structure of renamed files
         run: ls -R
