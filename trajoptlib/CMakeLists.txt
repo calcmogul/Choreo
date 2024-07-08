@@ -182,9 +182,16 @@ if(BUILD_TESTING)
         TrajoptLibTest
         PRIVATE TrajoptLib Catch2::Catch2WithMain
     )
-    if(NOT CMAKE_TOOLCHAIN_FILE)
-        # https://github.com/catchorg/Catch2/issues/2873
-        catch_discover_tests(TrajoptLibTest PROPERTIES SKIP_RETURN_CODE 4)
+    if(NOT CMAKE_TOOLCHAIN_FILE AND WIN32)
+        catch_discover_tests(
+            TrajoptLibTest
+            PROPERTIES
+                ENVIRONMENT_MODIFICATION
+                    "PATH=path_list_prepend:$<JOIN:$<TARGET_RUNTIME_DLL_DIRS:TrajoptLibTest>,\;>"
+                # https://github.com/catchorg/Catch2/issues/2873
+                SKIP_RETURN_CODE
+                    4
+        )
     endif()
 endif()
 
@@ -227,8 +234,15 @@ if(BUILD_EXAMPLES)
                 PRIVATE TrajoptLib Catch2::Catch2WithMain
             )
             if(NOT CMAKE_TOOLCHAIN_FILE)
-                # https://github.com/catchorg/Catch2/issues/2873
-                catch_discover_tests(${example}Test PROPERTIES SKIP_RETURN_CODE 4)
+                catch_discover_tests(
+                    ${example}Test
+                    PROPERTIES
+                        ENVIRONMENT_MODIFICATION
+                            "PATH=path_list_prepend:$<JOIN:$<TARGET_RUNTIME_DLL_DIRS:TrajoptLibTest>,\;>"
+                        # https://github.com/catchorg/Catch2/issues/2873
+                        SKIP_RETURN_CODE
+                            4
+                )
             endif()
         endif()
     endforeach()
