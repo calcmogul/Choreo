@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 
+#include <expected>
 #include <functional>
 #include <string>
 #include <utility>
@@ -15,7 +16,6 @@
 #include "trajopt/geometry/Translation2.hpp"
 #include "trajopt/path/PathBuilder.hpp"
 #include "trajopt/util/SymbolExports.hpp"
-#include "trajopt/util/expected"
 
 namespace trajopt {
 
@@ -223,7 +223,7 @@ class TRAJOPT_DLLEXPORT SwerveTrajectoryGenerator {
    * @return Returns a holonomic trajectory on success, or a string containing a
    *   failure reason.
    */
-  expected<SwerveSolution, std::string> Generate(bool diagnostics = false);
+  std::expected<SwerveSolution, std::string> Generate(bool diagnostics = false);
 
  private:
   /// Swerve path

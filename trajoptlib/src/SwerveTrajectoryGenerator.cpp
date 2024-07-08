@@ -251,7 +251,7 @@ SwerveTrajectoryGenerator::SwerveTrajectoryGenerator(
   ApplyInitialGuess(initialGuess);
 }
 
-expected<SwerveSolution, std::string> SwerveTrajectoryGenerator::Generate(
+std::expected<SwerveSolution, std::string> SwerveTrajectoryGenerator::Generate(
     bool diagnostics) {
   GetCancellationFlag() = 0;
   problem.Callback([this](const sleipnir::SolverIterationInfo&) -> bool {
@@ -267,7 +267,8 @@ expected<SwerveSolution, std::string> SwerveTrajectoryGenerator::Generate(
   if (static_cast<int>(status.exitCondition) < 0 ||
       status.exitCondition ==
           sleipnir::SolverExitCondition::kCallbackRequestedStop) {
-    return unexpected{std::string{sleipnir::ToMessage(status.exitCondition)}};
+    return std::unexpected{
+        std::string{sleipnir::ToMessage(status.exitCondition)}};
   } else {
     return ConstructSwerveSolution();
   }
@@ -335,20 +336,17 @@ SwerveSolution SwerveTrajectoryGenerator::ConstructSwerveSolution() {
 
   auto getValue = [](auto& var) { return var.Value(); };
 
-  // TODO: Use std::ranges::to() from C++23
   auto vectorValue = [&](std::vector<sleipnir::Variable>& row) {
-    auto view = row | std::views::transform(getValue);
-    return std::vector<double>{std::begin(view), std::end(view)};
+    return row | std::views::transform(getValue) |
+           std::ranges::to<std::vector>();
   };
 
-  // TODO: Use std::ranges::to() from C++23
   auto matrixValue = [&](std::vector<std::vector<sleipnir::Variable>>& mat) {
-    auto view =
-        mat | std::views::transform([&](auto& v) {
-          auto view2 = v | std::views::transform(getValue);
-          return std::vector<double>{std::begin(view2), std::end(view2)};
-        });
-    return std::vector<std::vector<double>>{std::begin(view), std::end(view)};
+    return mat | std::views::transform([&](auto& v) {
+             return v | std::views::transform(getValue) |
+                    std::ranges::to<std::vector>();
+           }) |
+           std::ranges::to<std::vector>();
   };
 
   return SwerveSolution{

@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include <cmath>
+#include <expected>
 #include <functional>
 #include <string>
 #include <utility>
@@ -15,7 +16,6 @@
 
 #include "trajopt/path/PathBuilder.hpp"
 #include "trajopt/util/SymbolExports.hpp"
-#include "trajopt/util/expected"
 
 namespace trajopt {
 
@@ -203,7 +203,7 @@ class TRAJOPT_DLLEXPORT DifferentialTrajectoryGenerator {
    * @return Returns a holonomic trajectory on success, or a string containing a
    *   failure reason.
    */
-  expected<DifferentialSolution, std::string> Generate(
+  std::expected<DifferentialSolution, std::string> Generate(
       bool diagnostics = false);
 
  private:
