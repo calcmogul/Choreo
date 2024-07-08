@@ -291,7 +291,7 @@ DifferentialTrajectoryGenerator::DifferentialTrajectoryGenerator(
   ApplyInitialGuess(initialGuess);
 }
 
-expected<DifferentialSolution, sleipnir::SolverExitCondition>
+std::expected<DifferentialSolution, sleipnir::SolverExitCondition>
 DifferentialTrajectoryGenerator::Generate(bool diagnostics) {
   problem.Callback([this](const sleipnir::SolverIterationInfo&) -> bool {
     for (auto& callback : callbacks) {
@@ -306,7 +306,7 @@ DifferentialTrajectoryGenerator::Generate(bool diagnostics) {
   if (static_cast<int>(status.exitCondition) < 0 ||
       status.exitCondition ==
           sleipnir::SolverExitCondition::kCallbackRequestedStop) {
-    return unexpected{status.exitCondition};
+    return std::unexpected{status.exitCondition};
   } else {
     return ConstructDifferentialSolution();
   }
@@ -365,10 +365,9 @@ DifferentialTrajectoryGenerator::ConstructDifferentialSolution() {
 
   auto getValue = [](auto& var) { return var.Value(); };
 
-  // TODO: Use std::ranges::to() from C++23
   auto vectorValue = [&](std::vector<sleipnir::Variable>& row) {
-    auto view = row | std::views::transform(getValue);
-    return std::vector<double>{std::begin(view), std::end(view)};
+    return row | std::views::transform(getValue) |
+           std::ranges::to<std::vector>();
   };
 
   return DifferentialSolution{
