@@ -165,8 +165,8 @@ DifferentialTrajectoryGenerator::DifferentialTrajectoryGenerator(
     const auto dx = initialGuess.x.at(sgmt_end) - initialGuess.x.at(sgmt_start);
     const auto dy = initialGuess.y.at(sgmt_end) - initialGuess.y.at(sgmt_start);
     const auto dist = std::hypot(dx, dy);
-    const auto θ_0 = initialGuess.heading.at(sgmt_start);
-    const auto θ_1 = initialGuess.heading.at(sgmt_end);
+    const auto θ_0 = initialGuess.theta.at(sgmt_start);
+    const auto θ_1 = initialGuess.theta.at(sgmt_end);
     const auto dθ = std::abs(AngleModulus(θ_0 - θ_1));
 
     auto maxLinearVel = maxDrivetrainVelocity;
@@ -318,7 +318,7 @@ void DifferentialTrajectoryGenerator::ApplyInitialGuess(
   for (size_t sampleIndex = 0; sampleIndex < sampleTotal; ++sampleIndex) {
     x[sampleIndex].SetValue(solution.x[sampleIndex]);
     y[sampleIndex].SetValue(solution.y[sampleIndex]);
-    θ[sampleIndex].SetValue(solution.heading[sampleIndex]);
+    θ[sampleIndex].SetValue(solution.theta[sampleIndex]);
   }
 
   vl[0].SetValue(0.0);
@@ -331,8 +331,8 @@ void DifferentialTrajectoryGenerator::ApplyInitialGuess(
         std::hypot(solution.x[sampleIndex] - solution.x[sampleIndex - 1],
                    solution.y[sampleIndex] - solution.y[sampleIndex - 1]) /
         solution.dt[sampleIndex];
-    double heading = solution.heading[sampleIndex];
-    double last_heading = solution.heading[sampleIndex - 1];
+    double heading = solution.theta[sampleIndex];
+    double last_heading = solution.theta[sampleIndex - 1];
 
     double omega =
         Rotation2d{heading}.RotateBy(-Rotation2d{last_heading}).Radians() /
