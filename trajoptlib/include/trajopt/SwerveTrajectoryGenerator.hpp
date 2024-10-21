@@ -55,11 +55,8 @@ struct TRAJOPT_DLLEXPORT SwerveSolution {
   /// Y positions.
   std::vector<double> y;
 
-  /// Heading cosine.
-  std::vector<double> thetacos;
-
-  /// Heading sine.
-  std::vector<double> thetasin;
+  /// Heading.
+  std::vector<double> theta;
 
   /// The x velocities.
   std::vector<double> vx;
@@ -192,8 +189,7 @@ class TRAJOPT_DLLEXPORT SwerveTrajectory {
     double ts = 0.0;
     for (size_t sample = 0; sample < solution.x.size(); ++sample) {
       samples.emplace_back(
-          ts, solution.x[sample], solution.y[sample],
-          std::atan2(solution.thetasin[sample], solution.thetacos[sample]),
+          ts, solution.x[sample], solution.y[sample], solution.theta[sample],
           solution.vx[sample], solution.vy[sample], solution.omega[sample],
           solution.ax[sample], solution.ay[sample], solution.alpha[sample],
           solution.moduleFx[sample], solution.moduleFy[sample]);
@@ -248,8 +244,7 @@ class TRAJOPT_DLLEXPORT SwerveTrajectoryGenerator {
   /// State Variables
   std::vector<sleipnir::Variable> x;
   std::vector<sleipnir::Variable> y;
-  std::vector<sleipnir::Variable> cosθ;
-  std::vector<sleipnir::Variable> sinθ;
+  std::vector<sleipnir::Variable> θ;
   std::vector<sleipnir::Variable> vx;
   std::vector<sleipnir::Variable> vy;
   std::vector<sleipnir::Variable> ω;
