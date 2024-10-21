@@ -140,32 +140,8 @@ sleipnir::EqualityConstraints operator==(const Rotation2<T>& lhs,
                                          const Rotation2<U>& rhs) {
   std::vector<sleipnir::EqualityConstraints> constraints;
 
-  // Constrain angle equality on manifold.
-  //
-  // Let lhs = <cos(a), sin(a)>.  NOLINT
-  // Let rhs = <cos(b), sin(b)>.  NOLINT
-  //
-  // If the angles are equal, the angle between the unit vectors should be
-  // zero.
-  //
-  //   lhs x rhs = ‖lhs‖ ‖rhs‖ sin(angleBetween)  NOLINT
-  //         = 1 * 1 * 0
-  //         = 0
-  //
-  // NOTE: angleBetween = π rad would be another solution
-  constraints.emplace_back(lhs.Cos() * rhs.Sin() - lhs.Sin() * rhs.Cos() ==
-                           0.0);
-
-  // Require that lhs and rhs are unit vectors if they contain autodiff
-  // variables, since their values can change.
-  if constexpr (std::same_as<T, sleipnir::Variable>) {
-    constraints.emplace_back(lhs.Cos() * lhs.Cos() + lhs.Sin() * lhs.Sin() ==
-                             1.0);
-  }
-  if constexpr (std::same_as<U, sleipnir::Variable>) {
-    constraints.emplace_back(rhs.Cos() * rhs.Cos() + rhs.Sin() * rhs.Sin() ==
-                             1.0);
-  }
+  constraints.emplace_back(lhs.Cos() == rhs.Cos());
+  constraints.emplace_back(lhs.Sin() == rhs.Sin());
 
   return sleipnir::EqualityConstraints{constraints};
 }

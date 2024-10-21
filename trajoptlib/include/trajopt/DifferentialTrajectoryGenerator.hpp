@@ -59,7 +59,7 @@ struct TRAJOPT_DLLEXPORT DifferentialSolution {
   std::vector<double> y;
 
   /// Heading.
-  std::vector<double> heading;
+  std::vector<double> theta;
 
   /// The left velocities.
   std::vector<double> vl;
@@ -175,7 +175,7 @@ class TRAJOPT_DLLEXPORT DifferentialTrajectory {
     double ts = 0.0;
     for (size_t sample = 0; sample < solution.x.size(); ++sample) {
       samples.emplace_back(
-          ts, solution.x[sample], solution.y[sample], solution.heading[sample],
+          ts, solution.x[sample], solution.y[sample], solution.theta[sample],
           solution.vl[sample], solution.vr[sample], solution.al[sample],
           solution.ar[sample], solution.Fl[sample], solution.Fr[sample]);
       ts += solution.dt[sample];
