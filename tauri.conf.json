@@ -1,0 +1,26 @@
+{
+  "build": {
+    "beforeDevCommand": "vite",
+    "beforeBuildCommand": "vite build",
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:1420"
+  },
+  "productName": "Choreo",
+  "version": "2025.0.0-beta-9",
+  "identifier": "org.sleipnirgroup",
+  "app": {
+    "windows": [
+      {
+        "fullscreen": false,
+        "resizable": true,
+        "title": "Choreo v2025.0.0-beta-9",
+        "width": 1200,
+        "height": 800
+      }
+    ],
+    "security": {
+      "capabilities": ["main-capability"],
+      "csp": null
+    }
+  }
+}
