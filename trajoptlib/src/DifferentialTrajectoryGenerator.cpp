@@ -139,6 +139,40 @@ DifferentialTrajectoryGenerator::DifferentialTrajectoryGenerator(
     dts.emplace_back(problem.DecisionVariable());
   }
 
+#if 1
+  // Minimize change in path curvature
+  //
+  // Let a, b, c be points of an arbitrary triangle.
+  //
+  //       b
+  //      . .
+  //     .   .
+  //    .     .
+  //   a.......c
+  //
+  //   ab = b - a
+  //   ac = c - a
+  sleipnir::Variable J = 0.0;
+  for (size_t wptIndex = 0; wptIndex < wptCnt - 1; ++wptIndex) {
+    size_t N_sgmt = Ns.at(wptIndex);
+
+    for (size_t sampleIndex = 1; sampleIndex < N_sgmt; ++sampleIndex) {
+      size_t index = GetIndex(Ns, wptIndex, sampleIndex);
+
+      Translation2v a{x.at(index - 1), y.at(index - 1)};
+      Translation2v b{x.at(index), y.at(index)};
+      Translation2v c{x.at(index + 1), y.at(index + 1)};
+
+      auto ab = b - a;
+      auto ac = c - a;
+
+      auto κ_k = ab.Cross(ac);
+
+      J += κ_k * κ_k;
+    }
+  }
+  problem.Minimize(std::move(J));
+#else
   // Minimize total time
   sleipnir::Variable T_tot = 0;
   const double maxForce =
@@ -187,6 +221,7 @@ DifferentialTrajectoryGenerator::DifferentialTrajectoryGenerator(
     }
   }
   problem.Minimize(std::move(T_tot));
+#endif
 
   // Apply dynamics constraints
   for (size_t wptIndex = 0; wptIndex < wptCnt - 1; ++wptIndex) {
