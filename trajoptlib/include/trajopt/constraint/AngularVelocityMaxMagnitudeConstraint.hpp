@@ -7,6 +7,7 @@
 #include <sleipnir/autodiff/Variable.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
+#include "trajopt/geometry/HPolytope2.hpp"
 #include "trajopt/geometry/Pose2.hpp"
 #include "trajopt/geometry/Translation2.hpp"
 #include "trajopt/util/SymbolExports.hpp"
@@ -34,6 +35,7 @@ class TRAJOPT_DLLEXPORT AngularVelocityMaxMagnitudeConstraint {
    *
    * @param problem The optimization problem.
    * @param pose The robot's pose.
+   * @param robotRegion The 2D region the robot occupies.
    * @param linearVelocity The robot's linear velocity.
    * @param angularVelocity The robot's angular velocity.
    * @param linearAcceleration The robot's linear acceleration.
@@ -41,6 +43,7 @@ class TRAJOPT_DLLEXPORT AngularVelocityMaxMagnitudeConstraint {
    */
   void Apply(sleipnir::OptimizationProblem& problem,
              [[maybe_unused]] const Pose2v& pose,
+             [[maybe_unused]] const HPolytope2v& robotRegion,
              [[maybe_unused]] const Translation2v& linearVelocity,
              const sleipnir::Variable& angularVelocity,
              [[maybe_unused]] const Translation2v& linearAcceleration,

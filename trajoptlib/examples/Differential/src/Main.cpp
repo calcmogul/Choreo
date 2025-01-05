@@ -99,20 +99,19 @@ int main() {
     path.SetDrivetrain(differentialDrivetrain);
     path.PoseWpt(0, 0.0, 0.0, 0.0);
     trajopt::KeepOutRegion keepOut{// Radius of 0.1
-                                   .safetyDistance = 0.1,
                                    .points = {{0.5, 0.5}}};
     for (size_t i = 0; i < path.GetBumpers().at(0).points.size(); i++) {
-      path.SgmtConstraint(0, 1,
-                          trajopt::PointPointMinConstraint{
-                              path.GetBumpers().at(0).points.at(i),
-                              keepOut.points.at(0), keepOut.safetyDistance});
+      path.SgmtConstraint(
+          0, 1,
+          trajopt::PointPointMinConstraint{path.GetBumpers().at(0).points.at(i),
+                                           keepOut.points.at(0), 0.1});
       path.SgmtConstraint(
           0, 1,
           trajopt::LinePointConstraint{
               path.GetBumpers().at(0).points.at(i),
               path.GetBumpers().at(0).points.at(
                   (i + 1) % path.GetBumpers().at(0).points.size()),
-              keepOut.points.at(0), keepOut.safetyDistance});
+              keepOut.points.at(0), 0.1});
     }
     path.PoseWpt(1, 1.0, 0.0, 0.0);
     path.WptConstraint(0, zeroLinearVelocity);
