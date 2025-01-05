@@ -5,7 +5,8 @@
 #include <cmath>
 #include <optional>
 
-#include "trajopt/constraint/PointLineRegionConstraint.hpp"
+#include "trajopt/constraint/HalfPlaneConstraint.hpp"
+#include "trajopt/geometry/HPolytope2.hpp"
 #include "trajopt/geometry/Rotation2.hpp"
 #include "trajopt/geometry/Translation2.hpp"
 #include "trajopt/util/SymbolExports.hpp"
@@ -37,16 +38,16 @@ class TRAJOPT_DLLEXPORT LaneConstraint {
             auto offset = Translation2d{0.0, tolerance}.RotateBy(
                 Rotation2d{dx / dist, dy / dist});
 
-            return PointLineRegionConstraint{{0.0, 0.0},
-                                             centerLineStart + offset,
-                                             centerLineEnd + offset,
-                                             Side::kBelow};
+            return HalfPlaneConstraint{{0.0, 0.0},
+                                       centerLineStart + offset,
+                                       centerLineEnd + offset,
+                                       Side::kBelow};
           } else {
-            return PointLineRegionConstraint{
+            return HalfPlaneConstraint{
                 {0.0, 0.0}, centerLineStart, centerLineEnd, Side::kOn};
           }
         }()},
-        m_bottomLine{[&]() -> std::optional<PointLineRegionConstraint> {
+        m_bottomLine{[&]() -> std::optional<HalfPlaneConstraint> {
           if (tolerance != 0.0) {
             double dx = centerLineEnd.X() - centerLineStart.X();
             double dy = centerLineEnd.Y() - centerLineStart.Y();
@@ -54,10 +55,10 @@ class TRAJOPT_DLLEXPORT LaneConstraint {
             auto offset = Translation2d{0.0, tolerance}.RotateBy(
                 Rotation2d{dx / dist, dy / dist});
 
-            return PointLineRegionConstraint{{0.0, 0.0},
-                                             centerLineStart - offset,
-                                             centerLineEnd - offset,
-                                             Side::kAbove};
+            return HalfPlaneConstraint{{0.0, 0.0},
+                                       centerLineStart - offset,
+                                       centerLineEnd - offset,
+                                       Side::kAbove};
           } else {
             return std::nullopt;
           }
@@ -68,27 +69,30 @@ class TRAJOPT_DLLEXPORT LaneConstraint {
    *
    * @param problem The optimization problem.
    * @param pose The robot's pose.
+   * @param robotRegion The 2D region the robot occupies.
    * @param linearVelocity The robot's linear velocity.
    * @param angularVelocity The robot's angular velocity.
    * @param linearAcceleration The robot's linear acceleration.
    * @param angularAcceleration The robot's angular acceleration.
    */
   void Apply(sleipnir::OptimizationProblem& problem, const Pose2v& pose,
+             const HPolytope2v& robotRegion,
              const Translation2v& linearVelocity,
              const sleipnir::Variable& angularVelocity,
              const Translation2v& linearAcceleration,
              const sleipnir::Variable& angularAcceleration) {
-    m_topLine.Apply(problem, pose, linearVelocity, angularVelocity,
+    m_topLine.Apply(problem, pose, robotRegion, linearVelocity, angularVelocity,
                     linearAcceleration, angularAcceleration);
     if (m_bottomLine.has_value()) {
-      m_bottomLine.value().Apply(problem, pose, linearVelocity, angularVelocity,
-                                 linearAcceleration, angularAcceleration);
+      m_bottomLine.value().Apply(problem, pose, robotRegion, linearVelocity,
+                                 angularVelocity, linearAcceleration,
+                                 angularAcceleration);
     }
   }
 
  private:
-  PointLineRegionConstraint m_topLine;
-  std::optional<PointLineRegionConstraint> m_bottomLine;
+  HalfPlaneConstraint m_topLine;
+  std::optional<HalfPlaneConstraint> m_bottomLine;
 };
 
 }  // namespace trajopt

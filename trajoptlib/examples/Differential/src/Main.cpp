@@ -94,25 +94,25 @@ int main() {
   }
 
   // Example 5: Differential, keep-out circle
+#if 0
   {
     trajopt::DifferentialPathBuilder path;
     path.SetDrivetrain(differentialDrivetrain);
     path.PoseWpt(0, 0.0, 0.0, 0.0);
     trajopt::KeepOutRegion keepOut{// Radius of 0.1
-                                   .safetyDistance = 0.1,
                                    .points = {{0.5, 0.5}}};
     for (size_t i = 0; i < path.GetBumpers().at(0).points.size(); i++) {
-      path.SgmtConstraint(0, 1,
-                          trajopt::PointPointMinConstraint{
-                              path.GetBumpers().at(0).points.at(i),
-                              keepOut.points.at(0), keepOut.safetyDistance});
+      path.SgmtConstraint(
+          0, 1,
+          trajopt::PointPointMinConstraint{path.GetBumpers().at(0).points.at(i),
+                                           keepOut.points.at(0), 0.1});
       path.SgmtConstraint(
           0, 1,
           trajopt::LinePointConstraint{
               path.GetBumpers().at(0).points.at(i),
               path.GetBumpers().at(0).points.at(
                   (i + 1) % path.GetBumpers().at(0).points.size()),
-              keepOut.points.at(0), keepOut.safetyDistance});
+              keepOut.points.at(0), 0.1});
     }
     path.PoseWpt(1, 1.0, 0.0, 0.0);
     path.WptConstraint(0, zeroLinearVelocity);
@@ -123,6 +123,7 @@ int main() {
     [[maybe_unused]]
     auto solution = generator.Generate(true);
   }
+#endif
 
   // Example 6: Approach a pick up station at a certain direction
   {
@@ -161,6 +162,7 @@ int main() {
   }
 
   // Example 7: Circular path with a point-point constraint
+#if 0
   {
     // Note that forcing a circular path is not a common problem in FRC. This
     // example is only here to demonstrate how various constraints work.
@@ -190,4 +192,5 @@ int main() {
     [[maybe_unused]]
     auto solution = generator.Generate(true);
   }
+#endif
 }
