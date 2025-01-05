@@ -11,12 +11,14 @@
 #include <vector>
 
 #include "trajopt/constraint/AngularVelocityMaxMagnitudeConstraint.hpp"
+#include "trajopt/constraint/HalfPlaneConstraint.hpp"
+#include "trajopt/constraint/KeepInCircleConstraint.hpp"
+#include "trajopt/constraint/KeepOutCircleConstraint.hpp"
 #include "trajopt/constraint/LaneConstraint.hpp"
 #include "trajopt/constraint/LinearAccelerationMaxMagnitudeConstraint.hpp"
 #include "trajopt/constraint/LinearVelocityDirectionConstraint.hpp"
 #include "trajopt/constraint/LinearVelocityMaxMagnitudeConstraint.hpp"
 #include "trajopt/constraint/PointAtConstraint.hpp"
-#include "trajopt/constraint/PointLineRegionConstraint.hpp"
 #include "trajopt/geometry/Translation2.hpp"
 #include "trajopt/util/Cancellation.hpp"
 #include "trajoptlib/src/lib.rs.h"
@@ -117,19 +119,9 @@ void SwerveTrajectoryGenerator::wpt_keep_in_circle(size_t index,
                                                    double field_point_x,
                                                    double field_point_y,
                                                    double keep_in_radius) {
-  for (size_t bumper = 0; bumper < path_builder.GetBumpers().size(); bumper++) {
-    for (size_t i = 0; i < path_builder.GetBumpers().at(bumper).points.size();
-         i++) {
-      path_builder.WptConstraint(
-          index, trajopt::PointPointMaxConstraint{
-                     path_builder.GetBumpers().at(bumper).points.at(i),
-                     {field_point_x, field_point_y},
-                     keep_in_radius});
-    }
-  }
   path_builder.WptConstraint(
-      index, trajopt::PointPointMaxConstraint{
-                 {0.0, 0.0}, {field_point_x, field_point_y}, keep_in_radius});
+      index, trajopt::KeepInCircleConstraint{{field_point_x, field_point_y},
+                                             keep_in_radius});
 }
 
 void SwerveTrajectoryGenerator::wpt_keep_in_polygon(
@@ -140,21 +132,13 @@ void SwerveTrajectoryGenerator::wpt_keep_in_polygon(
   }
   for (size_t i = 0; i < field_points_x.size(); i++) {
     auto j = (i + 1) % field_points_x.size();
-    path_builder.WptConstraint(index,
-                               trajopt::PointLineRegionConstraint{
-                                   {0.0, 0.0},
-                                   {field_points_x[i], field_points_y[i]},
-                                   {field_points_x[j], field_points_y[j]},
-                                   Side::kAbove});
-    for (const auto& bumper : path_builder.GetBumpers()) {
-      for (const auto& corner : bumper.points) {
-        path_builder.WptConstraint(index,
-                                   trajopt::PointLineRegionConstraint{
-                                       corner,
+    for (const auto& corner : path_builder.GetBumpers()) {
+      path_builder.WptConstraint(
+          index,
+          trajopt::HalfPlaneConstraint{corner,
                                        {field_points_x[i], field_points_y[i]},
                                        {field_points_x[j], field_points_y[j]},
                                        Side::kAbove});
-      }
     }
   }
 }
@@ -170,24 +154,8 @@ void SwerveTrajectoryGenerator::wpt_keep_in_lane(
 
 void SwerveTrajectoryGenerator::wpt_keep_out_circle(size_t index, double x,
                                                     double y, double radius) {
-  for (size_t bumper = 0; bumper < path_builder.GetBumpers().size(); bumper++) {
-    for (size_t i = 0; i < path_builder.GetBumpers().at(bumper).points.size();
-         i++) {
-      path_builder.WptConstraint(
-          index, trajopt::PointPointMinConstraint{
-                     path_builder.GetBumpers().at(bumper).points.at(i),
-                     {x, y},
-                     radius});
-      path_builder.WptConstraint(
-          index,
-          trajopt::LinePointConstraint{
-              path_builder.GetBumpers().at(bumper).points.at(i),
-              path_builder.GetBumpers().at(bumper).points.at(
-                  (i + 1) % path_builder.GetBumpers().at(bumper).points.size()),
-              {x, y},
-              radius});
-    }
-  }
+  path_builder.WptConstraint(index,
+                             trajopt::KeepOutCircleConstraint{{x, y}, radius});
 }
 
 void SwerveTrajectoryGenerator::sgmt_linear_velocity_direction(
@@ -231,17 +199,10 @@ void SwerveTrajectoryGenerator::sgmt_keep_in_circle(size_t from_index,
                                                     double field_point_x,
                                                     double field_point_y,
                                                     double keep_in_radius) {
-  for (size_t bumper = 0; bumper < path_builder.GetBumpers().size(); bumper++) {
-    for (size_t i = 0; i < path_builder.GetBumpers().at(bumper).points.size();
-         i++) {
-      path_builder.SgmtConstraint(
-          from_index, to_index,
-          trajopt::PointPointMaxConstraint{
-              path_builder.GetBumpers().at(bumper).points.at(i),
-              {field_point_x, field_point_y},
-              keep_in_radius});
-    }
-  }
+  path_builder.SgmtConstraint(
+      from_index, to_index,
+      trajopt::KeepInCircleConstraint{{field_point_x, field_point_y},
+                                      keep_in_radius});
 }
 
 void SwerveTrajectoryGenerator::sgmt_keep_in_polygon(
@@ -252,21 +213,13 @@ void SwerveTrajectoryGenerator::sgmt_keep_in_polygon(
   }
   for (size_t i = 0; i < field_points_x.size(); i++) {
     auto j = (i + 1) % field_points_x.size();
-    path_builder.SgmtConstraint(from_index, to_index,
-                                trajopt::PointLineRegionConstraint{
-                                    {0.0, 0.0},
-                                    {field_points_x[i], field_points_y[i]},
-                                    {field_points_x[j], field_points_y[j]},
-                                    Side::kAbove});
-    for (const auto& bumper : path_builder.GetBumpers()) {
-      for (const auto& corner : bumper.points) {
-        path_builder.SgmtConstraint(from_index, to_index,
-                                    trajopt::PointLineRegionConstraint{
-                                        corner,
-                                        {field_points_x[i], field_points_y[i]},
-                                        {field_points_x[j], field_points_y[j]},
-                                        Side::kAbove});
-      }
+    for (const auto& corner : path_builder.GetBumpers()) {
+      path_builder.SgmtConstraint(
+          from_index, to_index,
+          trajopt::HalfPlaneConstraint{corner,
+                                       {field_points_x[i], field_points_y[i]},
+                                       {field_points_x[j], field_points_y[j]},
+                                       Side::kAbove});
     }
   }
 }
@@ -285,25 +238,8 @@ void SwerveTrajectoryGenerator::sgmt_keep_in_lane(
 void SwerveTrajectoryGenerator::sgmt_keep_out_circle(size_t from_index,
                                                      size_t to_index, double x,
                                                      double y, double radius) {
-  for (size_t bumper = 0; bumper < path_builder.GetBumpers().size(); bumper++) {
-    for (size_t i = 0; i < path_builder.GetBumpers().at(bumper).points.size();
-         i++) {
-      path_builder.SgmtConstraint(
-          from_index, to_index,
-          trajopt::PointPointMinConstraint{
-              path_builder.GetBumpers().at(bumper).points.at(i),
-              {x, y},
-              radius});
-      path_builder.SgmtConstraint(
-          from_index, to_index,
-          trajopt::LinePointConstraint{
-              path_builder.GetBumpers().at(bumper).points.at(i),
-              path_builder.GetBumpers().at(bumper).points.at(
-                  (i + 1) % path_builder.GetBumpers().at(bumper).points.size()),
-              {x, y},
-              radius});
-    }
-  }
+  path_builder.SgmtConstraint(from_index, to_index,
+                              trajopt::KeepOutCircleConstraint{{x, y}, radius});
 }
 
 void SwerveTrajectoryGenerator::add_callback(
@@ -455,19 +391,9 @@ void DifferentialTrajectoryGenerator::wpt_point_at(size_t index,
 void DifferentialTrajectoryGenerator::wpt_keep_in_circle(
     size_t index, double field_point_x, double field_point_y,
     double keep_in_radius) {
-  for (size_t bumper = 0; bumper < path_builder.GetBumpers().size(); bumper++) {
-    for (size_t i = 0; i < path_builder.GetBumpers().at(bumper).points.size();
-         i++) {
-      path_builder.WptConstraint(
-          index, trajopt::PointPointMaxConstraint{
-                     path_builder.GetBumpers().at(bumper).points.at(i),
-                     {field_point_x, field_point_y},
-                     keep_in_radius});
-    }
-  }
   path_builder.WptConstraint(
-      index, trajopt::PointPointMaxConstraint{
-                 {0.0, 0.0}, {field_point_x, field_point_y}, keep_in_radius});
+      index, trajopt::KeepInCircleConstraint{{field_point_x, field_point_y},
+                                             keep_in_radius});
 }
 
 void DifferentialTrajectoryGenerator::wpt_keep_in_polygon(
@@ -476,23 +402,15 @@ void DifferentialTrajectoryGenerator::wpt_keep_in_polygon(
   if (field_points_x.size() != field_points_y.size()) {
     return;
   }
-  for (size_t i = 0; i < field_points_x.size(); i++) {
-    auto j = (i + 1) % field_points_x.size();
-    path_builder.WptConstraint(index,
-                               trajopt::PointLineRegionConstraint{
-                                   {0.0, 0.0},
-                                   {field_points_x[i], field_points_y[i]},
-                                   {field_points_x[j], field_points_y[j]},
-                                   Side::kAbove});
-    for (const auto& bumper : path_builder.GetBumpers()) {
-      for (const auto& corner : bumper.points) {
-        path_builder.WptConstraint(index,
-                                   trajopt::PointLineRegionConstraint{
-                                       corner,
-                                       {field_points_x[i], field_points_y[i]},
-                                       {field_points_x[j], field_points_y[j]},
-                                       Side::kAbove});
-      }
+  for (size_t current = 0; current < field_points_x.size(); ++current) {
+    auto next = (current + 1) % field_points_x.size();
+    for (const auto& corner : path_builder.GetBumpers()) {
+      path_builder.WptConstraint(
+          index, trajopt::HalfPlaneConstraint{
+                     corner,
+                     {field_points_x[current], field_points_y[current]},
+                     {field_points_x[next], field_points_y[next]},
+                     Side::kAbove});
     }
   }
 }
@@ -509,24 +427,8 @@ void DifferentialTrajectoryGenerator::wpt_keep_in_lane(
 void DifferentialTrajectoryGenerator::wpt_keep_out_circle(size_t index,
                                                           double x, double y,
                                                           double radius) {
-  for (size_t bumper = 0; bumper < path_builder.GetBumpers().size(); bumper++) {
-    for (size_t i = 0; i < path_builder.GetBumpers().at(bumper).points.size();
-         i++) {
-      path_builder.WptConstraint(
-          index, trajopt::PointPointMinConstraint{
-                     path_builder.GetBumpers().at(bumper).points.at(i),
-                     {x, y},
-                     radius});
-      path_builder.WptConstraint(
-          index,
-          trajopt::LinePointConstraint{
-              path_builder.GetBumpers().at(bumper).points.at(i),
-              path_builder.GetBumpers().at(bumper).points.at(
-                  (i + 1) % path_builder.GetBumpers().at(bumper).points.size()),
-              {x, y},
-              radius});
-    }
-  }
+  path_builder.WptConstraint(index,
+                             trajopt::KeepOutCircleConstraint{{x, y}, radius});
 }
 
 void DifferentialTrajectoryGenerator::sgmt_linear_velocity_direction(
@@ -559,17 +461,10 @@ void DifferentialTrajectoryGenerator::sgmt_linear_acceleration_max_magnitude(
 void DifferentialTrajectoryGenerator::sgmt_keep_in_circle(
     size_t from_index, size_t to_index, double field_point_x,
     double field_point_y, double keep_in_radius) {
-  for (size_t bumper = 0; bumper < path_builder.GetBumpers().size(); bumper++) {
-    for (size_t i = 0; i < path_builder.GetBumpers().at(bumper).points.size();
-         i++) {
-      path_builder.SgmtConstraint(
-          from_index, to_index,
-          trajopt::PointPointMaxConstraint{
-              path_builder.GetBumpers().at(bumper).points.at(i),
-              {field_point_x, field_point_y},
-              keep_in_radius});
-    }
-  }
+  path_builder.SgmtConstraint(
+      from_index, to_index,
+      trajopt::KeepInCircleConstraint{{field_point_x, field_point_y},
+                                      keep_in_radius});
 }
 
 void DifferentialTrajectoryGenerator::sgmt_keep_in_polygon(
@@ -580,21 +475,13 @@ void DifferentialTrajectoryGenerator::sgmt_keep_in_polygon(
   }
   for (size_t i = 0; i < field_points_x.size(); i++) {
     auto j = (i + 1) % field_points_x.size();
-    path_builder.SgmtConstraint(from_index, to_index,
-                                trajopt::PointLineRegionConstraint{
-                                    {0.0, 0.0},
-                                    {field_points_x[i], field_points_y[i]},
-                                    {field_points_x[j], field_points_y[j]},
-                                    Side::kAbove});
-    for (const auto& bumper : path_builder.GetBumpers()) {
-      for (const auto& corner : bumper.points) {
-        path_builder.SgmtConstraint(from_index, to_index,
-                                    trajopt::PointLineRegionConstraint{
-                                        corner,
-                                        {field_points_x[i], field_points_y[i]},
-                                        {field_points_x[j], field_points_y[j]},
-                                        Side::kAbove});
-      }
+    for (const auto& corner : path_builder.GetBumpers()) {
+      path_builder.SgmtConstraint(
+          from_index, to_index,
+          trajopt::HalfPlaneConstraint{corner,
+                                       {field_points_x[i], field_points_y[i]},
+                                       {field_points_x[j], field_points_y[j]},
+                                       Side::kAbove});
     }
   }
 }
@@ -614,25 +501,8 @@ void DifferentialTrajectoryGenerator::sgmt_keep_out_circle(size_t from_index,
                                                            size_t to_index,
                                                            double x, double y,
                                                            double radius) {
-  for (size_t bumper = 0; bumper < path_builder.GetBumpers().size(); bumper++) {
-    for (size_t i = 0; i < path_builder.GetBumpers().at(bumper).points.size();
-         i++) {
-      path_builder.SgmtConstraint(
-          from_index, to_index,
-          trajopt::PointPointMinConstraint{
-              path_builder.GetBumpers().at(bumper).points.at(i),
-              {x, y},
-              radius});
-      path_builder.SgmtConstraint(
-          from_index, to_index,
-          trajopt::LinePointConstraint{
-              path_builder.GetBumpers().at(bumper).points.at(i),
-              path_builder.GetBumpers().at(bumper).points.at(
-                  (i + 1) % path_builder.GetBumpers().at(bumper).points.size()),
-              {x, y},
-              radius});
-    }
-  }
+  path_builder.SgmtConstraint(from_index, to_index,
+                              trajopt::KeepOutCircleConstraint{{x, y}, radius});
 }
 
 void DifferentialTrajectoryGenerator::add_callback(
