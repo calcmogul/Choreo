@@ -9,6 +9,7 @@
 #include <sleipnir/autodiff/Variable.hpp>
 #include <sleipnir/optimization/OptimizationProblem.hpp>
 
+#include "trajopt/geometry/HPolytope2.hpp"
 #include "trajopt/geometry/Pose2.hpp"
 #include "trajopt/geometry/Translation2.hpp"
 #include "trajopt/util/SymbolExports.hpp"
@@ -28,24 +29,24 @@ enum class Side : uint8_t {
 };
 
 /**
- * Point-line region constraint.
+ * Half-plane constraint.
  *
  * Specifies that a point on the robot must be on one side of a line defined by
  * two points on the field
  */
-class TRAJOPT_DLLEXPORT PointLineRegionConstraint {
+class TRAJOPT_DLLEXPORT HalfPlaneConstraint {
  public:
   /**
-   * Constructs a PointLineRegionConstraint.
+   * Constructs a HalfPlaneConstraint.
    *
    * @param robotPoint Robot point.
    * @param fieldLineStart Field line start.
    * @param fieldLineEnd Field line end.
    * @param side The side to constrain the robot to.
    */
-  explicit PointLineRegionConstraint(Translation2d robotPoint,
-                                     Translation2d fieldLineStart,
-                                     Translation2d fieldLineEnd, Side side)
+  explicit HalfPlaneConstraint(Translation2d robotPoint,
+                               Translation2d fieldLineStart,
+                               Translation2d fieldLineEnd, Side side)
       : m_robotPoint{std::move(robotPoint)},
         m_fieldLineStart{std::move(fieldLineStart)},
         m_fieldLineEnd{std::move(fieldLineEnd)},
@@ -56,12 +57,14 @@ class TRAJOPT_DLLEXPORT PointLineRegionConstraint {
    *
    * @param problem The optimization problem.
    * @param pose The robot's pose.
+   * @param robotRegion The 2D region the robot occupies.
    * @param linearVelocity The robot's linear velocity.
    * @param angularVelocity The robot's angular velocity.
    * @param linearAcceleration The robot's linear acceleration.
    * @param angularAcceleration The robot's angular acceleration.
    */
   void Apply(sleipnir::OptimizationProblem& problem, const Pose2v& pose,
+             [[maybe_unused]] const HPolytope2v& robotRegion,
              [[maybe_unused]] const Translation2v& linearVelocity,
              [[maybe_unused]] const sleipnir::Variable& angularVelocity,
              [[maybe_unused]] const Translation2v& linearAcceleration,
