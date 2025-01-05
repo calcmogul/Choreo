@@ -11,6 +11,7 @@
 #include <sleipnir/autodiff/Variable.hpp>
 #include <sleipnir/optimization/SolverExitCondition.hpp>
 
+#include "trajopt/geometry/HPolytope2.hpp"
 #include "trajopt/geometry/Rotation2.hpp"
 #include "trajopt/geometry/Translation2.hpp"
 #include "trajopt/util/Cancellation.hpp"
@@ -264,6 +265,8 @@ DifferentialTrajectoryGenerator::DifferentialTrajectoryGenerator(
     size_t index = GetIndex(Ns, wptIndex, 0);
 
     Pose2v pose_k{x.at(index), y.at(index), {θ.at(index)}};
+    auto region_k =
+        HPolytope2v{pathBuilder.GetBumpers()}.RotateBy(pose_k.Rotation());
     Translation2v v_k = WheelToChassisSpeeds(vl.at(index), vr.at(index));
     auto ω_k = (vr.at(index) - vl.at(index)) / path.drivetrain.trackwidth;
     Translation2v a_k = WheelToChassisSpeeds(al.at(index), ar.at(index));
@@ -271,7 +274,9 @@ DifferentialTrajectoryGenerator::DifferentialTrajectoryGenerator(
 
     for (auto& constraint : path.waypoints.at(wptIndex).waypointConstraints) {
       std::visit(
-          [&](auto&& arg) { arg.Apply(problem, pose_k, v_k, ω_k, a_k, α_k); },
+          [&](auto&& arg) {
+            arg.Apply(problem, pose_k, region_k, v_k, ω_k, a_k, α_k);
+          },
           constraint);
     }
   }
@@ -282,6 +287,8 @@ DifferentialTrajectoryGenerator::DifferentialTrajectoryGenerator(
 
     for (size_t index = startIndex; index < endIndex; ++index) {
       Pose2v pose_k{x.at(index), y.at(index), {θ.at(index)}};
+      auto region_k =
+          HPolytope2v{pathBuilder.GetBumpers()}.RotateBy(pose_k.Rotation());
       Translation2v v_k = WheelToChassisSpeeds(vl.at(index), vr.at(index));
       auto ω_k = (vr.at(index) - vl.at(index)) / path.drivetrain.trackwidth;
       Translation2v a_k = WheelToChassisSpeeds(al.at(index), ar.at(index));
@@ -290,7 +297,9 @@ DifferentialTrajectoryGenerator::DifferentialTrajectoryGenerator(
       for (auto& constraint :
            path.waypoints.at(sgmtIndex + 1).segmentConstraints) {
         std::visit(
-            [&](auto&& arg) { arg.Apply(problem, pose_k, v_k, ω_k, a_k, α_k); },
+            [&](auto&& arg) {
+              arg.Apply(problem, pose_k, region_k, v_k, ω_k, a_k, α_k);
+            },
             constraint);
       }
     }

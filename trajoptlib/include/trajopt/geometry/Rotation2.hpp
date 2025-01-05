@@ -8,6 +8,7 @@
 #include <utility>
 #include <vector>
 
+#include <Eigen/Core>
 #include <sleipnir/autodiff/Variable.hpp>
 
 namespace trajopt {
@@ -114,6 +115,17 @@ class Rotation2 {
     using R = decltype(std::declval<T>() + std::declval<U>());
     return Rotation2<R>{Cos() * other.Cos() - Sin() * other.Sin(),
                         Cos() * other.Sin() + Sin() * other.Cos()};
+  }
+
+  /**
+   * Returns matrix representation of this rotation.
+   *
+   * @return Matrix representation of this rotation.
+   */
+  constexpr Eigen::Matrix<T, 2, 2> ToMatrix() const {
+    // R = [cosθ  −sinθ]
+    //     [sinθ   cosθ]
+    return Eigen::Matrix<T, 2, 2>{{m_cos, -m_sin}, {m_sin, m_cos}};
   }
 
   /**

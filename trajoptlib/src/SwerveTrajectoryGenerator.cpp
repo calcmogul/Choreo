@@ -280,6 +280,8 @@ SwerveTrajectoryGenerator::SwerveTrajectoryGenerator(
     size_t index = GetIndex(Ns, wptIndex, 0);
 
     Pose2v pose_k{x.at(index), y.at(index), {cosθ.at(index), sinθ.at(index)}};
+    auto region_k =
+        HPolytope2v{pathBuilder.GetBumpers()}.RotateBy(pose_k.Rotation());
     Translation2v v_k{vx.at(index), vy.at(index)};
     auto ω_k = ω.at(index);
     Translation2v a_k{ax.at(index), ay.at(index)};
@@ -287,7 +289,9 @@ SwerveTrajectoryGenerator::SwerveTrajectoryGenerator(
 
     for (auto& constraint : path.waypoints.at(wptIndex).waypointConstraints) {
       std::visit(
-          [&](auto&& arg) { arg.Apply(problem, pose_k, v_k, ω_k, a_k, α_k); },
+          [&](auto&& arg) {
+            arg.Apply(problem, pose_k, region_k, v_k, ω_k, a_k, α_k);
+          },
           constraint);
     }
   }
@@ -298,6 +302,8 @@ SwerveTrajectoryGenerator::SwerveTrajectoryGenerator(
 
     for (size_t index = startIndex; index < endIndex; ++index) {
       Pose2v pose_k{x.at(index), y.at(index), {cosθ.at(index), sinθ.at(index)}};
+      auto region_k =
+          HPolytope2v{pathBuilder.GetBumpers()}.RotateBy(pose_k.Rotation());
       Translation2v v_k{vx.at(index), vy.at(index)};
       auto ω_k = ω.at(index);
       Translation2v a_k{ax.at(index), ay.at(index)};
@@ -306,7 +312,9 @@ SwerveTrajectoryGenerator::SwerveTrajectoryGenerator(
       for (auto& constraint :
            path.waypoints.at(sgmtIndex + 1).segmentConstraints) {
         std::visit(
-            [&](auto&& arg) { arg.Apply(problem, pose_k, v_k, ω_k, a_k, α_k); },
+            [&](auto&& arg) {
+              arg.Apply(problem, pose_k, region_k, v_k, ω_k, a_k, α_k);
+            },
             constraint);
       }
     }
