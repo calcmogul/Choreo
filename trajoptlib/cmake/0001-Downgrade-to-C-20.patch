@@ -4,14 +4,15 @@ Date: Sat, 11 Jan 2025 17:45:42 -0800
 Subject: [PATCH] Downgrade to C++20
 
 ---
- .styleguide                            |  1 +
- CMakeLists.txt                         | 10 ++++++++++
- cmake/modules/CompilerFlags.cmake      |  2 +-
- include/.styleguide                    |  1 +
- include/sleipnir/util/Print.hpp        | 27 +++++++++++++-------------
- include/sleipnir/util/Spy.hpp          |  8 +++++++-
- src/util/PrintIterationDiagnostics.hpp |  3 +--
- 7 files changed, 35 insertions(+), 17 deletions(-)
+ .styleguide                                   |  1 +
+ CMakeLists.txt                                | 14 +++++++++-
+ cmake/modules/CompilerFlags.cmake             |  2 +-
+ include/.styleguide                           |  1 +
+ .../autodiff/AdjointExpressionGraph.hpp       |  6 +++--
+ include/sleipnir/util/Print.hpp               | 27 ++++++++++---------
+ include/sleipnir/util/Spy.hpp                 |  8 +++++-
+ src/util/PrintDiagnostics.hpp                 | 15 ++++++++---
+ 8 files changed, 53 insertions(+), 21 deletions(-)
 
 diff --git a/.styleguide b/.styleguide
 index 2cf272a115102886134455a87ea5c7dcf7188283..76e25473e77ab7838509eaeeefa7170a06507f8c 100644
@@ -26,10 +27,10 @@ index 2cf272a115102886134455a87ea5c7dcf7188283..76e25473e77ab7838509eaeeefa7170a
    ^sleipnir/
  }
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 46a2e975b631269b552c3ab5963168a6813a1f5f..fe6158309e606583438d4aa22d00780f817e38f1 100644
+index 89eaf739fa1fc02b3f9c8a2c136e6ae1c07b9094..385ca5dfd2313b771401cbea77ca6943815cb289 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -114,6 +114,16 @@ endif()
+@@ -120,6 +120,16 @@ endif()
  
  target_link_libraries(Sleipnir PUBLIC Eigen3::Eigen)
  
@@ -43,11 +44,29 @@ index 46a2e975b631269b552c3ab5963168a6813a1f5f..fe6158309e606583438d4aa22d00780f
 +
 +target_link_libraries(Sleipnir PUBLIC fmt::fmt)
 +
- if(BUILD_TESTING)
+ if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
      # Catch2 dependency
      fetchcontent_declare(
+@@ -315,7 +325,8 @@ if(BUILD_PYTHON)
+ 
+     # Build Sleipnir dependency directly into the wheel to avoid having to
+     # configure RPATHs
+-    nanobind_add_module(_jormungandr ${jormungandr_src} ${Sleipnir_src})
++    set(fmt_src ${fmt_SOURCE_DIR}/src/format.cc ${fmt_SOURCE_DIR}/src/os.cc)
++    nanobind_add_module(_jormungandr ${jormungandr_src} ${fmt_src} ${Sleipnir_src})
+     compiler_flags(_jormungandr)
+     target_compile_definitions(_jormungandr PRIVATE JORMUNGANDR=1)
+     target_include_directories(
+@@ -323,6 +334,7 @@ if(BUILD_PYTHON)
+         PRIVATE
+             ${CMAKE_CURRENT_SOURCE_DIR}/src
+             ${CMAKE_CURRENT_SOURCE_DIR}/include
++            ${fmt_SOURCE_DIR}/include
+             ${CMAKE_CURRENT_SOURCE_DIR}/jormungandr/cpp
+     )
+     target_link_libraries(_jormungandr PUBLIC Threads::Threads Eigen3::Eigen)
 diff --git a/cmake/modules/CompilerFlags.cmake b/cmake/modules/CompilerFlags.cmake
-index bab9de4de2c79abb3195cdd8b3a8b56da665e900..8caa4b1d7c7f4be463b2541fba91561428193d51 100644
+index 9eab8d03d2e80bea7111afc6486329933d4d61ec..31252813a6d776e95e1351923577377f46d854fd 100644
 --- a/cmake/modules/CompilerFlags.cmake
 +++ b/cmake/modules/CompilerFlags.cmake
 @@ -22,7 +22,7 @@ macro(compiler_flags target)
@@ -69,6 +88,30 @@ index 8fb61fdf9cc5ceff633d3126f0579eef25a1326f..6a7f8ed28f9cb037c9746a7e0ef5e110
    ^Eigen/
 +  ^fmt/
  }
+diff --git a/include/sleipnir/autodiff/AdjointExpressionGraph.hpp b/include/sleipnir/autodiff/AdjointExpressionGraph.hpp
+index f344eca95443cdfe58a45732708f21f068b12d4f..6ba8b18b6bf079f97cb9831190ef43ff1fd01da0 100644
+--- a/include/sleipnir/autodiff/AdjointExpressionGraph.hpp
++++ b/include/sleipnir/autodiff/AdjointExpressionGraph.hpp
+@@ -2,7 +2,6 @@
+ 
+ #pragma once
+ 
+-#include <ranges>
+ #include <utility>
+ 
+ #include <Eigen/SparseCore>
+@@ -103,7 +102,10 @@ class AdjointExpressionGraph {
+                              int row) const {
+     detail::UpdateAdjoints(m_topList);
+ 
+-    for (const auto& [node, col] : std::views::zip(m_topList, m_colList)) {
++    for (size_t i = 0; i < m_topList.size(); ++i) {
++      const auto& node = m_topList[i];
++      const auto& col = m_colList[i];
++
+       // Append adjoints of wrt to sparse matrix triplets
+       if (col != -1 && node->adjoint != 0.0) {
+         triplets.emplace_back(row, col, node->adjoint);
 diff --git a/include/sleipnir/util/Print.hpp b/include/sleipnir/util/Print.hpp
 index a746cb77b70f095bb15f4c493295cb925bc74cd3..484d1b2bec7148c5b9affccbf554c7df2b954cc0 100644
 --- a/include/sleipnir/util/Print.hpp
@@ -167,24 +210,43 @@ index 1abeb469a43d3d644efc1ad0e06e43928149ed0a..ae112430d7609356748b81d5dc4d0b5a
      }
      m_file.write(reinterpret_cast<char*>(&num), sizeof(num));
    }
-diff --git a/src/util/PrintIterationDiagnostics.hpp b/src/util/PrintIterationDiagnostics.hpp
-index 7b46202169d3d90eda16e76f3aff7f862e694079..44f5f9a31221397697638dd42b2968dca55c25e9 100644
---- a/src/util/PrintIterationDiagnostics.hpp
-+++ b/src/util/PrintIterationDiagnostics.hpp
-@@ -8,7 +8,6 @@
+diff --git a/src/util/PrintDiagnostics.hpp b/src/util/PrintDiagnostics.hpp
+index de747734a5c648d93a19c990cb41220bec3adcb2..44fc07009d975a3e6988c4657e6e333a5f803ca8 100644
+--- a/src/util/PrintDiagnostics.hpp
++++ b/src/util/PrintDiagnostics.hpp
+@@ -9,7 +9,7 @@
  #include <cmath>
  #include <ranges>
  #include <string>
 -#include <utility>
++#include <type_traits>
  
  #include "sleipnir/util/Print.hpp"
- #include "sleipnir/util/small_vector.hpp"
-@@ -54,7 +53,7 @@ void PrintIterationDiagnostics(int iterations, IterationMode mode,
+ #include "sleipnir/util/SetupProfiler.hpp"
+@@ -30,6 +30,15 @@ enum class IterationType : uint8_t {
+   kRejectedSOC
+ };
  
-   constexpr const char* kIterationModes[] = {" ", "s", "r"};
-   sleipnir::print("{:4}{}  {:9.3f}  {:13e}  {:13e}  {:13e}  ", iterations,
--                  kIterationModes[std::to_underlying(mode)],
-+                  kIterationModes[static_cast<uint8_t>(mode)],
-                   ToMilliseconds(time), error, cost, infeasibility);
++/**
++ * Converts an enumeration to its underlying type.
++ */
++template <typename T>
++[[nodiscard]]
++constexpr std::underlying_type_t<T> to_underlying(T value) noexcept {
++  return static_cast<std::underlying_type_t<T>>(value);
++}
++
+ /**
+  * Converts std::chrono::duration to a number of milliseconds rounded to three
+  * decimals.
+@@ -89,8 +98,8 @@ void PrintIterationDiagnostics(int iterations, IterationType type,
+ 
+   constexpr const char* kIterationTypes[] = {"norm", "✓SOC", "XSOC"};
+   sleipnir::print("│{:4} {:4} {:9.3f} {:12e} {:13e} {:12e} {:12e} ", iterations,
+-                  kIterationTypes[std::to_underlying(type)], ToMs(time), error,
+-                  cost, infeasibility, complementarity);
++                  kIterationTypes[to_underlying(type)], ToMs(time), error, cost,
++                  infeasibility, complementarity);
  
    // Print regularization
+   if (δ == 0.0) {

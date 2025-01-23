@@ -83,7 +83,7 @@ DifferentialTrajectoryGenerator::DifferentialTrajectoryGenerator(
 
   auto initialGuess = pathBuilder.CalculateInitialGuess();
 
-  problem.Callback(
+  problem.AddCallback(
       [this, handle = handle](const sleipnir::SolverIterationInfo&) -> bool {
         constexpr int fps = 60;
         constexpr std::chrono::duration<double> timePerFrame{1.0 / fps};
