@@ -5,8 +5,8 @@
 #include <cassert>
 #include <utility>
 
-#include <sleipnir/autodiff/Variable.hpp>
-#include <sleipnir/optimization/OptimizationProblem.hpp>
+#include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/optimization/optimization_problem.hpp>
 
 #include "trajopt/geometry/Pose2.hpp"
 #include "trajopt/geometry/Translation2.hpp"
@@ -65,12 +65,12 @@ class TRAJOPT_DLLEXPORT PointAtConstraint {
     auto dot = pose.Rotation().Cos() * dx + pose.Rotation().Sin() * dy;
     if (!m_flip) {
       // dot close to 1 * hypot (point toward)
-      problem.SubjectTo(dot >=
-                        std::cos(m_headingTolerance) * sleipnir::hypot(dx, dy));
+      problem.subject_to(dot >= std::cos(m_headingTolerance) *
+                                    sleipnir::hypot(dx, dy));
     } else {
       // dot close to -1 * hypot (point away)
-      problem.SubjectTo(dot <= -std::cos(m_headingTolerance) *
-                                   sleipnir::hypot(dx, dy));
+      problem.subject_to(dot <= -std::cos(m_headingTolerance) *
+                                    sleipnir::hypot(dx, dy));
     }
   }
 

@@ -5,7 +5,7 @@
 #include <concepts>
 #include <utility>
 
-#include <sleipnir/autodiff/Variable.hpp>
+#include <sleipnir/autodiff/variable.hpp>
 
 #include "trajopt/geometry/Rotation2.hpp"
 #include "trajopt/geometry/Translation2.hpp"

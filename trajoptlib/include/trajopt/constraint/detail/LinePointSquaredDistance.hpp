@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <sleipnir/autodiff/Variable.hpp>
+#include <sleipnir/autodiff/variable.hpp>
 
 #include "trajopt/geometry/Translation2.hpp"
 

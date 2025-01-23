@@ -8,7 +8,7 @@
 #include <utility>
 #include <vector>
 
-#include <sleipnir/autodiff/Variable.hpp>
+#include <sleipnir/autodiff/variable.hpp>
 
 namespace trajopt {
 

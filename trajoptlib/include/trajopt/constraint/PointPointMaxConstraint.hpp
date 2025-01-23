@@ -5,8 +5,8 @@
 #include <cassert>
 #include <utility>
 
-#include <sleipnir/autodiff/Variable.hpp>
-#include <sleipnir/optimization/OptimizationProblem.hpp>
+#include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/optimization/optimization_problem.hpp>
 
 #include "trajopt/geometry/Pose2.hpp"
 #include "trajopt/geometry/Translation2.hpp"
@@ -57,7 +57,7 @@ class TRAJOPT_DLLEXPORT PointPointMaxConstraint {
         pose.Translation() + m_robotPoint.RotateBy(pose.Rotation());
     auto dx = m_fieldPoint.X() - bumperCorner.X();
     auto dy = m_fieldPoint.Y() - bumperCorner.Y();
-    problem.SubjectTo(dx * dx + dy * dy <= m_maxDistance * m_maxDistance);
+    problem.subject_to(dx * dx + dy * dy <= m_maxDistance * m_maxDistance);
   }
 
  private:

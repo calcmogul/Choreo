@@ -4,8 +4,8 @@
 
 #include <cassert>
 
-#include <sleipnir/autodiff/Variable.hpp>
-#include <sleipnir/optimization/OptimizationProblem.hpp>
+#include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/optimization/optimization_problem.hpp>
 
 #include "trajopt/geometry/Pose2.hpp"
 #include "trajopt/geometry/Translation2.hpp"
@@ -46,10 +46,10 @@ class TRAJOPT_DLLEXPORT AngularVelocityMaxMagnitudeConstraint {
              [[maybe_unused]] const Translation2v& linearAcceleration,
              [[maybe_unused]] const sleipnir::Variable& angularAcceleration) {
     if (m_maxMagnitude == 0.0) {
-      problem.SubjectTo(angularVelocity == 0.0);
+      problem.subject_to(angularVelocity == 0.0);
     } else {
-      problem.SubjectTo(angularVelocity >= -m_maxMagnitude);
-      problem.SubjectTo(angularVelocity <= m_maxMagnitude);
+      problem.subject_to(angularVelocity >= -m_maxMagnitude);
+      problem.subject_to(angularVelocity <= m_maxMagnitude);
     }
   }
 

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include <sleipnir/autodiff/Variable.hpp>
-#include <sleipnir/optimization/OptimizationProblem.hpp>
+#include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/optimization/optimization_problem.hpp>
 
 #include "trajopt/geometry/Pose2.hpp"
 #include "trajopt/geometry/Translation2.hpp"
@@ -45,7 +45,7 @@ class TRAJOPT_DLLEXPORT LinearVelocityDirectionConstraint {
     //   v ⋅ u = ‖v‖
     //   (v ⋅ u)² = ‖v‖²
     auto dot = linearVelocity.Dot(Translation2d{m_angle.Cos(), m_angle.Sin()});
-    problem.SubjectTo(dot * dot == linearVelocity.SquaredNorm());
+    problem.subject_to(dot * dot == linearVelocity.SquaredNorm());
   }
 
  private:

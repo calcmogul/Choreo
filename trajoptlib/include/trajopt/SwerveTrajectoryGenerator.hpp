@@ -5,9 +5,9 @@
 #include <utility>
 #include <vector>
 
-#include <sleipnir/autodiff/Variable.hpp>
-#include <sleipnir/optimization/OptimizationProblem.hpp>
-#include <sleipnir/optimization/SolverExitCondition.hpp>
+#include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/optimization/optimization_problem.hpp>
+#include <sleipnir/optimization/solver_exit_condition.hpp>
 
 #include "trajopt/geometry/Translation2.hpp"
 #include "trajopt/path/PathBuilder.hpp"

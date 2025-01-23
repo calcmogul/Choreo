@@ -5,8 +5,8 @@
 #include <cassert>
 #include <utility>
 
-#include <sleipnir/autodiff/Variable.hpp>
-#include <sleipnir/optimization/OptimizationProblem.hpp>
+#include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/optimization/optimization_problem.hpp>
 
 #include "trajopt/constraint/detail/LinePointSquaredDistance.hpp"
 #include "trajopt/geometry/Pose2.hpp"
@@ -63,7 +63,7 @@ class TRAJOPT_DLLEXPORT LinePointConstraint {
         pose.Translation() + m_robotLineEnd.RotateBy(pose.Rotation());
     auto squaredDistance =
         detail::LinePointSquaredDistance(lineStart, lineEnd, m_fieldPoint);
-    problem.SubjectTo(squaredDistance >= m_minDistance * m_minDistance);
+    problem.subject_to(squaredDistance >= m_minDistance * m_minDistance);
   }
 
  private:

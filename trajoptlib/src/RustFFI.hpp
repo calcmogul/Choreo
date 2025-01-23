@@ -8,7 +8,7 @@
 #include <type_traits>
 
 #include <rust/cxx.h>
-#include <sleipnir/optimization/SolverExitCondition.hpp>
+#include <sleipnir/optimization/solver_exit_condition.hpp>
 
 #include "trajopt/DifferentialTrajectoryGenerator.hpp"
 #include "trajopt/SwerveTrajectoryGenerator.hpp"

@@ -6,8 +6,8 @@
 
 #include <utility>
 
-#include <sleipnir/autodiff/Variable.hpp>
-#include <sleipnir/optimization/OptimizationProblem.hpp>
+#include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/optimization/optimization_problem.hpp>
 
 #include "trajopt/geometry/Pose2.hpp"
 #include "trajopt/geometry/Translation2.hpp"
@@ -98,13 +98,13 @@ class TRAJOPT_DLLEXPORT PointLineRegionConstraint {
 
     switch (m_side) {
       case Side::kAbove:
-        problem.SubjectTo(cross > 0);
+        problem.subject_to(cross > 0);
         break;
       case Side::kBelow:
-        problem.SubjectTo(cross < 0);
+        problem.subject_to(cross < 0);
         break;
       case Side::kOn:
-        problem.SubjectTo(cross == 0);
+        problem.subject_to(cross == 0);
         break;
     }
   }

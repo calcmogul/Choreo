@@ -7,8 +7,8 @@
 #include <tuple>
 #include <utility>
 
-#include <sleipnir/autodiff/Variable.hpp>
-#include <sleipnir/autodiff/VariableMatrix.hpp>
+#include <sleipnir/autodiff/variable.hpp>
+#include <sleipnir/autodiff/variable_matrix.hpp>
 
 #include "trajopt/geometry/Rotation2.hpp"
 
