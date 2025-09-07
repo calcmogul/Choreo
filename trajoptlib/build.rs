@@ -49,6 +49,7 @@ fn main() {
     println!("cargo:rustc-link-lib=TrajoptLibRust");
     println!("cargo:rustc-link-lib=TrajoptLib");
     println!("cargo:rustc-link-lib=Sleipnir");
+    println!("cargo:rustc-link-lib=fmt");
 
     println!("cargo:rerun-if-changed=CMakeLists.txt");
     println!("cargo:rerun-if-changed=cmake");
