@@ -6,6 +6,10 @@ cppSrcFileInclude {
   \.cpp$
 }
 
+modifiableFileExclude {
+  \.patch$
+}
+
 includeOtherLibs {
   ^Eigen/
   ^sleipnir/

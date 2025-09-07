@@ -359,8 +359,8 @@ DifferentialTrajectoryGenerator::construct_differential_solution() {
   auto get_value = [](auto& var) { return var.value(); };
 
   auto vector_value = [&](std::vector<slp::Variable>& row) {
-    return row | std::views::transform(get_value) |
-           std::ranges::to<std::vector>();
+    auto view = row | std::views::transform(get_value);
+    return std::vector<double>{std::begin(view), std::end(view)};
   };
   const auto& trackwidth = path.drivetrain.trackwidth;
   std::vector<double> ω;
