@@ -105,6 +105,11 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/SleipnirGroup/Sleipnir
     # main on 2025-09-27
     GIT_TAG 14257278954eac4c455fae8a9f379d0dc823ccbe
+    PATCH_COMMAND
+        git apply
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sleipnir_patches/0001-Use-fmtlib.patch
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sleipnir_patches/0002-Replace-std-views-zip.patch
+    UPDATE_DISCONNECTED 1
 )
 FetchContent_MakeAvailable(Sleipnir)
 

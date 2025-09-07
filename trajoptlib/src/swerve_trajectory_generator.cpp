@@ -384,16 +384,17 @@ SwerveSolution SwerveTrajectoryGenerator::construct_swerve_solution() {
   auto get_value = [](auto& var) { return var.value(); };
 
   auto vector_value = [&](std::vector<slp::Variable>& row) {
-    return row | std::views::transform(get_value) |
-           std::ranges::to<std::vector>();
+    auto view = row | std::views::transform(get_value);
+    return std::vector<double>{std::begin(view), std::end(view)};
   };
 
   auto matrix_value = [&](std::vector<std::vector<slp::Variable>>& mat) {
-    return mat | std::views::transform([&](auto& v) {
-             return v | std::views::transform(get_value) |
-                    std::ranges::to<std::vector>();
-           }) |
-           std::ranges::to<std::vector>();
+    auto view1 =
+        mat | std::views::transform([&](auto& v) {
+          auto view2 = v | std::views::transform(get_value);
+          return std::vector<double>{std::begin(view2), std::end(view2)};
+        });
+    return std::vector<std::vector<double>>{std::begin(view1), std::end(view1)};
   };
 
   return SwerveSolution{
