@@ -58,8 +58,8 @@ set(BUILD_EXAMPLES OFF)
 
 FetchContent_Declare(
     Sleipnir
-    GIT_REPOSITORY https://github.com/SleipnirGroup/Sleipnir
-    GIT_TAG v0.4.0
+    GIT_REPOSITORY https://github.com/calcmogul/Sleipnir
+    GIT_TAG main
     GIT_SHALLOW ON
     SYSTEM
 )
