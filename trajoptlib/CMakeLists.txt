@@ -51,22 +51,20 @@ if(BUILD_TESTING)
 endif()
 
 set(BUILD_TESTING_SAVE ${BUILD_TESTING})
-set(BUILD_EXAMPLES_SAVE ${BUILD_EXAMPLES})
-
 set(BUILD_TESTING OFF)
-set(BUILD_EXAMPLES OFF)
 
+set(SLEIPNIR_BUILD_EXAMPLES OFF)
 FetchContent_Declare(
     Sleipnir
     GIT_REPOSITORY https://github.com/SleipnirGroup/Sleipnir
-    GIT_TAG v0.5.2
+    # main on 2026-04-11
+    GIT_TAG b435844c8d10c1a5fc3f2f6434a2adbb2b7a9a6f
     GIT_SHALLOW ON
     SYSTEM
 )
 FetchContent_MakeAvailable(Sleipnir)
 
 set(BUILD_TESTING ${BUILD_TESTING_SAVE})
-set(BUILD_EXAMPLES ${BUILD_EXAMPLES_SAVE})
 
 target_link_libraries(TrajoptLib PUBLIC Sleipnir::Sleipnir)
 
