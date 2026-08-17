@@ -25,8 +25,8 @@ def load_differential_trajectory_string(
 ) -> DifferentialTrajectory:
     """Load a differential trajectory from a string.
 
-    Parameter ``trajectory_json_string``:
-        The JSON string.
+    Args:
+        trajectory_json_string: The JSON string.
     """
     # Usage report
     hal.report_usage("ChoreoTrajectory", 2, "ChoreoLib")
@@ -77,9 +77,9 @@ def load_differential_trajectory_string(
 def load_differential_trajectory(trajectory_name: str) -> DifferentialTrajectory:
     """Load a differential trajectory from a file.
 
-    Parameter ``trajectory_name``:
-        The path name in Choreo, which matches the file name in the deploy
-        directory. Do not include ".traj" here.
+    Args:
+        trajectory_name: The path name in Choreo, which matches the file name in
+            the deploy directory. Do not include ".traj" here.
     """
     with open(
         os.path.join(get_deploy_directory(), "choreo", trajectory_name + ".traj"),
@@ -93,8 +93,8 @@ def load_differential_trajectory(trajectory_name: str) -> DifferentialTrajectory
 def load_swerve_trajectory_string(trajectory_json_string: str) -> SwerveTrajectory:
     """Load a swerve trajectory from a string.
 
-    Parameter ``trajectory_json_string``:
-        The JSON string.
+    Args:
+        trajectory_json_string: The JSON string.
     """
     # Usage report
     hal.report_usage("ChoreoTrajectory", 1, "ChoreoLib")
@@ -145,9 +145,9 @@ def load_swerve_trajectory_string(trajectory_json_string: str) -> SwerveTrajecto
 def load_swerve_trajectory(trajectory_name: str) -> SwerveTrajectory:
     """Load a swerve trajectory from a file.
 
-    Parameter ``trajectory_name``:
-        The path name in Choreo, which matches the file name in the deploy
-        directory. Do not include ".traj" here.
+    Args:
+        trajectory_name: The path name in Choreo, which matches the file name in
+            the deploy directory. Do not include ".traj" here.
     """
     with open(
         os.path.join(get_deploy_directory(), "choreo", trajectory_name + ".traj"),
