@@ -17,8 +17,9 @@ class MirroredFlipper:
         """
         Flips the X coordinate.
 
-        Parameter ``x``:
-            The X coordinate to flip.
+        Args:
+            x: The X coordinate to flip.
+
         Returns:
             The flipped X coordinate.
         """
@@ -29,8 +30,9 @@ class MirroredFlipper:
         """
         Flips the Y coordinate.
 
-        Parameter ``y``:
-            The Y coordinate to flip.
+        Args:
+            y: The Y coordinate to flip.
+
         Returns:
             The flipped Y coordinate.
         """
@@ -41,8 +43,9 @@ class MirroredFlipper:
         """
         Flips the heading.
 
-        Parameter ``heading``:
-            The heading to flip.
+        Args:
+            heading: The heading to flip.
+
         Returns:
             The flipped heading.
         """
@@ -57,8 +60,9 @@ class MirroredYFlipper:
         """
         Flips the X coordinate.
 
-        Parameter ``x``:
-            The X coordinate to flip.
+        Args:
+            x: The X coordinate to flip.
+
         Returns:
             The flipped X coordinate.
         """
@@ -69,8 +73,9 @@ class MirroredYFlipper:
         """
         Flips the Y coordinate.
 
-        Parameter ``y``:
-            The Y coordinate to flip.
+        Args:
+            y: The Y coordinate to flip.
+
         Returns:
             The flipped Y coordinate.
         """
@@ -81,8 +86,9 @@ class MirroredYFlipper:
         """
         Flips the heading.
 
-        Parameter ``heading``:
-            The heading to flip.
+        Args:
+            heading: The heading to flip.
+
         Returns:
             The flipped heading.
         """
@@ -97,8 +103,9 @@ class RotateAroundFlipper:
         """
         Flips the X coordinate.
 
-        Parameter ``x``:
-            The X coordinate to flip.
+        Args:
+            x: The X coordinate to flip.
+
         Returns:
             The flipped X coordinate.
         """
@@ -109,8 +116,9 @@ class RotateAroundFlipper:
         """
         Flips the Y coordinate.
 
-        Parameter ``y``:
-            The Y coordinate to flip.
+        Args:
+            y: The Y coordinate to flip.
+
         Returns:
             The flipped Y coordinate.
         """
@@ -121,8 +129,9 @@ class RotateAroundFlipper:
         """
         Flips the heading.
 
-        Parameter ``heading``:
-            The heading to flip.
+        Args:
+            heading: The heading to flip.
+
         Returns:
             The flipped heading.
         """
@@ -148,8 +157,8 @@ def get_flipper_for_year(year: int = DEFAULT_YEAR):
 
     If the provided year is invalid, the current year is used instead.
 
-    Parameter ``year``:
-        The field year (default: the current year).
+    Args:
+        year: The field year (default: the current year).
     """
     try:
         flipper_type = FLIPPER_MAP[year]
