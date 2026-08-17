@@ -36,8 +36,8 @@ class EventMarker:
         Returns a new EventMarker with the timestamp offset by the specified
         amount.
 
-        Parameter ``timestamp_offset``:
-            The amount to offset the timestamp by.
+        Args:
+            timestamp_offset: The amount to offset the timestamp by.
 
         Returns:
             A new EventMarker with the timestamp offset by the specified amount.
@@ -66,43 +66,21 @@ class DifferentialSample:
     """
     Constructs a DifferentialSample with the specified parameters.
 
-    Parameter ``timestamp``:
-        The timestamp of this state, relative to the beginning of the
-        trajectory.
-
-    Parameter ``x``:
-        The X position of the state in meters.
-
-    Parameter ``y``:
-        The Y position of the state in meters.
-
-    Parameter ``heading``:
-        The heading of the state in radians, with 0 being in the +X
-        direction.
-
-    Parameter ``vl``:
-        The left linear velocity of the state in m/s.
-
-    Parameter ``vr``:
-        The right linear velocity of the state in m/s.
-
-    Parameter ``omega``:
-        The chassis angular velocity of the state in rad/s.
-
-    Parameter ``al``:
-        The left linear acceleration of the state in m/s².
-
-    Parameter ``ar``:
-        The right linear acceleration of the state in m/s².
-
-    Parameter ``alpha``:
-        The chassis angular acceleration of the state in rad/s².
-
-    Parameter ``fl``:
-        The left force on the swerve modules in Newtons.
-
-    Parameter ``fr``:
-        The right force on the swerve modules in Newtons.
+    Args:
+        timestamp: The timestamp of this state, relative to the beginning of the
+            trajectory.
+        x: The X position of the state in meters.
+        y: The Y position of the state in meters.
+        heading: The heading of the state in radians, with 0 being in the +X
+            direction.
+        vl: The left linear velocity of the state in m/s.
+        vr: The right linear velocity of the state in m/s.
+        omega: The chassis angular velocity of the state in rad/s.
+        al: The left linear acceleration of the state in m/s².
+        ar: The right linear acceleration of the state in m/s².
+        alpha: The chassis angular acceleration of the state in rad/s².
+        fl: The left force on the swerve modules in Newtons.
+        fr: The right force on the swerve modules in Newtons.
     """
 
     # The timestamp of this state, relative to the beginning of the trajectory.
@@ -138,12 +116,11 @@ class DifferentialSample:
         """
         Interpolate between this state and the provided state.
 
-        Parameter ``end_value``:
-            The next state. It should have a timestamp after this state.
-
-        Parameter ``t``:
-            The timestamp of the interpolated state. It should be between this
-            state and end_value.
+        Args:
+            end_value: The next state. It should have a timestamp after this
+                state.
+            t: The timestamp of the interpolated state. It should be between
+                this state and end_value.
 
         Returns:
             The interpolated state.
@@ -199,8 +176,8 @@ class DifferentialSample:
         """
         Returns the current sample flipped based on the field year.
 
-        Parameter ``year``:
-            The field year (default: the current year).
+        Args:
+            year: The field year (default: the current year).
         """
         flipper = get_flipper_for_year(year)
         if flipper.IS_MIRRORED:
@@ -271,17 +248,11 @@ class DifferentialTrajectory:
     """
     Constructs a Trajectory with the specified parameters.
 
-    Parameter ``name``:
-        The name of the trajectory.
-
-    Parameter ``samples``:
-        A vector containing a list of Samples.
-
-    Parameter ``splits``:
-        The indices of the splits in the trajectory.
-
-    Parameter ``events``:
-        The events in the trajectory.
+    Args:
+        name: The name of the trajectory.
+        samples: A vector containing a list of Samples.
+        splits: The indices of the splits in the trajectory.
+        events: The events in the trajectory.
     """
 
     name: str
@@ -331,12 +302,11 @@ class DifferentialTrajectory:
         """
         Return an interpolated sample of the trajectory at the given timestamp.
 
-        Parameter ``timestamp``:
-            The timestamp of this sample relative to the beginning of the
-            trajectory.
-
-        Parameter ``flip_for_red_alliance``:
-            Whether or not to return the sample as flipped for the current year.
+        Args:
+            timestamp: The timestamp of this sample relative to the beginning of
+                the trajectory.
+            flip_for_red_alliance: Whether or not to return the sample as
+                flipped for the current year.
 
         Returns:
             The Sample at the given time.
@@ -356,8 +326,8 @@ class DifferentialTrajectory:
         """
         Returns the initial pose of the trajectory.
 
-        Parameter ``flip_for_red_alliance``:
-            Whether or not to return the Pose flipped.
+        Args:
+            flip_for_red_alliance: Whether or not to return the Pose flipped.
         """
 
         if len(self.samples) == 0:
@@ -372,8 +342,8 @@ class DifferentialTrajectory:
         """
         Returns the final pose of the trajectory.
 
-        Parameter ``flip_for_red_alliance``:
-            Whether or not to return the Pose flipped.
+        Args:
+            flip_for_red_alliance: Whether or not to return the Pose flipped.
         """
         if len(self.samples) == 0:
             return None
@@ -402,8 +372,8 @@ class DifferentialTrajectory:
         """
         Returns this trajectory flipped based on the field year.
 
-        Parameter ``year``:
-            The field year (default: the current year).
+        Args:
+            year: The field year (default: the current year).
         """
         return DifferentialTrajectory(
             self.name, [x.flipped() for x in self.samples], self.splits, self.events
@@ -442,43 +412,21 @@ class SwerveSample:
     """
     Constructs a SwerveSample with the specified parameters.
 
-    Parameter ``timestamp``:
-        The timestamp of this state, relative to the beginning of the
-        trajectory.
-
-    Parameter ``x``:
-        The X position of the state in meters.
-
-    Parameter ``y``:
-        The Y position of the state in meters.
-
-    Parameter ``heading``:
-        The heading of the state in radians, with 0 being in the +X
-        direction.
-
-    Parameter ``vx``:
-        The linear velocity of the state in the X direction in m/s.
-
-    Parameter ``vy``:
-        The linear velocity of the state in the Y direction in m/s.
-
-    Parameter ``omega``:
-        The angular velocity of the state in rad/s.
-
-    Parameter ``ax``:
-        The linear acceleration of the state in the X direction in m/s².
-
-    Parameter ``ay``:
-        The linear acceleration of the state in the Y direction in m/s².
-
-    Parameter ``alpha``:
-        The angular acceleration of the state in rad/s².
-
-    Parameter ``fx``:
-        The force on the swerve modules in the X direction in Newtons.
-
-    Parameter ``fy``:
-        The force on the swerve modules in the Y direction in Newtons.
+    Args:
+        timestamp: The timestamp of this state, relative to the beginning of the
+            trajectory.
+        x: The X position of the state in meters.
+        y: The Y position of the state in meters.
+        heading: The heading of the state in radians, with 0 being in the +X
+            direction.
+        vx: The linear velocity of the state in the X direction in m/s.
+        vy: The linear velocity of the state in the Y direction in m/s.
+        omega: The angular velocity of the state in rad/s.
+        ax: The linear acceleration of the state in the X direction in m/s².
+        ay: The linear acceleration of the state in the Y direction in m/s².
+        alpha: The angular acceleration of the state in rad/s².
+        fx: The force on the swerve modules in the X direction in Newtons.
+        fy: The force on the swerve modules in the Y direction in Newtons.
     """
 
     timestamp: float
@@ -510,12 +458,11 @@ class SwerveSample:
         """
         Interpolate between this state and the provided state.
 
-        Parameter ``end_value``:
-            The next state. It should have a timestamp after this state.
-
-        Parameter ``t``:
-            The timestamp of the interpolated state. It should be between this
-            state and end_value.
+        Args:
+            end_value: The next state. It should have a timestamp after this
+                state.
+            t: The timestamp of the interpolated state. It should be between
+                this state and end_value.
 
         Returns:
             The interpolated state.
@@ -552,8 +499,8 @@ class SwerveSample:
         """
         Returns the current sample flipped based on the field year.
 
-        Parameter ``year``:
-            The field year (default: the current year).
+        Args:
+            year: The field year (default: the current year).
         """
         flipper = get_flipper_for_year(year)
         if flipper.IS_MIRRORED:
@@ -624,17 +571,11 @@ class SwerveTrajectory:
     """
     Constructs a SwerveTrajectory with the specified parameters.
 
-    Parameter ``name``:
-        The name of the trajectory.
-
-    Parameter ``samples``:
-        A vector containing a list of Samples.
-
-    Parameter ``splits``:
-        The indices of the splits in the trajectory.
-
-    Parameter ``events``:
-        The events in the trajectory.
+    Args:
+        name: The name of the trajectory.
+        samples: A vector containing a list of Samples.
+        splits: The indices of the splits in the trajectory.
+        events: The events in the trajectory.
     """
 
     name: str
@@ -684,12 +625,11 @@ class SwerveTrajectory:
         """
         Return an interpolated sample of the trajectory at the given timestamp.
 
-        Parameter ``timestamp``:
-            The timestamp of this sample relative to the beginning of the
-            trajectory.
-
-        Parameter ``flip_for_red_alliance``:
-            Whether or not to return the sample as flipped for the current year.
+        Args:
+            timestamp: The timestamp of this sample relative to the beginning of
+                the trajectory.
+            flip_for_red_alliance: Whether or not to return the sample as
+                flipped for the current year.
 
         Returns:
             The Sample at the given time.
@@ -709,8 +649,8 @@ class SwerveTrajectory:
         """
         Returns the initial pose of the trajectory.
 
-        Parameter ``flip_for_red_alliance``:
-            Whether or not to return the Pose flipped.
+        Args:
+            flip_for_red_alliance: Whether or not to return the Pose flipped.
         """
 
         if len(self.samples) == 0:
@@ -725,8 +665,8 @@ class SwerveTrajectory:
         """
         Returns the final pose of the trajectory.
 
-        Parameter ``flip_for_red_alliance``:
-            Whether or not to return the Pose flipped.
+        Args:
+            flip_for_red_alliance: Whether or not to return the Pose flipped.
         """
 
         if len(self.samples) == 0:
@@ -757,8 +697,8 @@ class SwerveTrajectory:
         """
         Returns this trajectory flipped based on the field year.
 
-        Parameter ``year``:
-            The field year (default: the current year).
+        Args:
+            year: The field year (default: the current year).
         """
         return SwerveTrajectory(
             self.name, [x.flipped() for x in self.samples], self.splits, self.events
